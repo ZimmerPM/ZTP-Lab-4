@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using ProductCart.BFF.Application.Services.Interfaces;
 using ProductCart.BFF.Infrastructure.HttpClients;
+using ProductCart.BFF.Infrastructure.Services;
 
 namespace ProductCart.BFF.Infrastructure.Configuration;
 
@@ -23,6 +25,10 @@ public static class DependencyInjection
             client.BaseAddress = new Uri(cartApiBaseUrl);
             client.Timeout = TimeSpan.FromSeconds(30);
         });
+
+        services.AddScoped<IProductService, ProductService>();
+        services.AddScoped<ICartService, CartService>();
+        services.AddScoped<ICartAggregationService, CartAggregationService>();
 
         return services;
     }
