@@ -1,20 +1,14 @@
-﻿namespace ProductCart.MAUI
-{
-    public partial class App : Application
-    {
-        public App()
-        {
-            InitializeComponent();
+﻿using ProductCart.MAUI.Views;
 
-            MainPage = new ContentPage
-            {
-                Content = new Label
-                {
-                    Text = "ProductCart MAUI - Ready to build!",
-                    HorizontalOptions = LayoutOptions.Center,
-                    VerticalOptions = LayoutOptions.Center
-                }
-            };
-        }
+namespace ProductCart.MAUI;
+
+public partial class App : Application
+{
+    public App(IServiceProvider serviceProvider)
+    {
+        InitializeComponent();
+
+        var productListPage = serviceProvider.GetRequiredService<ProductListPage>();
+        MainPage = new NavigationPage(productListPage);
     }
 }

@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:ProductCart.MAUI.ViewModels"
+             xmlns:models="clr-namespace:ProductCart.MAUI.Models"
+             x:Class="ProductCart.MAUI.Views.ProductListPage"
+             x:DataType="viewmodels:ProductListViewModel"
+             Title="{Binding Title}">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Loading Indicator -->
+        <ActivityIndicator Grid.Row="0"
+                          IsRunning="{Binding IsBusy}"
+                          IsVisible="{Binding IsBusy}"
+                          Color="Blue"
+                          Margin="10"/>
+
+        <!-- Error Message -->
+        <Label Grid.Row="0"
+               Text="{Binding ErrorMessage}"
+               IsVisible="{Binding HasError}"
+               TextColor="Red"
+               Margin="10"
+               HorizontalOptions="Center"/>
+
+        <!-- Products List -->
+        <RefreshView Grid.Row="1"
+                     Command="{Binding LoadProductsCommand}"
+                     IsRefreshing="{Binding IsBusy}">
+
+            <CollectionView ItemsSource="{Binding Products}"
+                           SelectionMode="None">
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Product">
+                        <Frame Margin="10,5"
+                               Padding="10"
+                               BorderColor="LightGray"
+                               CornerRadius="5">
+
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer 
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:ProductListViewModel}}, Path=ProductTappedCommand}"
+                                    CommandParameter="{Binding .}"/>
+                            </Frame.GestureRecognizers>
+
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
+
+                                <!-- Product Name -->
+                                <Label Grid.Row="0" Grid.Column="0"
+                                       Text="{Binding Name}"
+                                       FontSize="18"
+                                       FontAttributes="Bold"/>
+
+                                <!-- Category -->
+                                <Label Grid.Row="1" Grid.Column="0"
+                                       Text="{Binding CategoryName}"
+                                       FontSize="14"
+                                       TextColor="Gray"/>
+
+                                <!-- Price -->
+                                <Label Grid.Row="0" Grid.Column="1" Grid.RowSpan="2"
+                                       Text="{Binding DisplayPrice}"
+                                       FontSize="20"
+                                       FontAttributes="Bold"
+                                       TextColor="Green"
+                                       VerticalOptions="Center"/>
+
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+            </CollectionView>
+        </RefreshView>
+
+    </Grid>
+
+</ContentPage>
+    

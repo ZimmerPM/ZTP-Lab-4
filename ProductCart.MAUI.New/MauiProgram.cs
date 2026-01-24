@@ -24,10 +24,13 @@ public static class MauiProgram
         builder.Logging.AddDebug();
 #endif
 
-        // HttpClient
-        builder.Services.AddHttpClient<IProductService, ProductService>();
+        // HttpClient & Services
+        builder.Services.AddHttpClient<IProductService, ProductService>(client =>
+        {
+            client.BaseAddress = new Uri("http://localhost:5300/api/");
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
 
-        // Services
         builder.Services.AddSingleton<IProductService, ProductService>();
 
         // ViewModels

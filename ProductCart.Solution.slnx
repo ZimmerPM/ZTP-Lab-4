@@ -1,6 +1,21 @@
 <Solution>
-  <Project Path="ProductCart.BFF.API/ProductCart.BFF.API.csproj" />
-  <Project Path="ProductCart.BFF.Application/ProductCart.BFF.Application.csproj" />
-  <Project Path="ProductCart.BFF.Infrastructure/ProductCart.BFF.Infrastructure.csproj" />
-  <Project Path="ProductCart.MAUI/ProductCart.MAUI.csproj" Id="6bfd23f3-549f-4c6d-8184-2a66bf7649ac" />
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+  </Configurations>
+  <Project Path="ProductCart.BFF.API/ProductCart.BFF.API.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="ProductCart.BFF.Application/ProductCart.BFF.Application.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="ProductCart.BFF.Infrastructure/ProductCart.BFF.Infrastructure.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="ProductCart.MAUI.New/ProductCart.MAUI.New.csproj" Id="57d59a3f-dbee-4cd2-bc90-75db83d3afc6">
+    <Deploy Solution="Debug|Any CPU" />
+  </Project>
+  <Project Path="ProductCart.MAUI/ProductCart.MAUI.csproj" Id="6bfd23f3-549f-4c6d-8184-2a66bf7649ac">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
 </Solution>
