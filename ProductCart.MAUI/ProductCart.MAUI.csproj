@@ -39,8 +39,12 @@
 
 	<ItemGroup>
 	  <Folder Include="Data\" />
-	  <Folder Include="Views\" />
-	  <Folder Include="ViewModels\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiXaml Update="Views\ProductListPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	</ItemGroup>
 
 </Project>
