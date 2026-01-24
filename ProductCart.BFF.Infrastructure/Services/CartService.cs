@@ -26,7 +26,6 @@ public class CartService : ICartService
 
     public async Task<bool> AddItemToCartAsync(string userId, AddToCartRequest request)
     {
-        // Konwersja productId: jeśli to int, stwórz GUID
         var productIdGuid = ConvertToGuid(request.ProductId);
 
         var lab3Request = new Lab3AddItemRequest

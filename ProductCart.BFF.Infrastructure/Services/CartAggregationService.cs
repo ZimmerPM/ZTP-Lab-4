@@ -74,13 +74,15 @@ public class CartAggregationService : ICartAggregationService
     {
         if (Guid.TryParse(guidString, out var guid))
         {
-            var guidStr = guid.ToString();
-            var lastPart = guidStr.Split('-').Last();
+            var bytes = guid.ToByteArray();
+            var productId = BitConverter.ToInt32(bytes, 0);
 
-            if (int.TryParse(lastPart, out int productId))
-                return productId;
+            Console.WriteLine($"[DEBUG] Extracted productId from GUID: {productId}");
+            return productId;
         }
 
+        Console.WriteLine($"[DEBUG] Failed to parse GUID: {guidString}");
         return null;
     }
 }
+
