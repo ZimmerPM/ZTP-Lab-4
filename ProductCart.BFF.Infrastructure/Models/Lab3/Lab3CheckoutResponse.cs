@@ -1,6 +1,6 @@
-﻿namespace ProductCart.BFF.Application.DTOs;
+﻿namespace ProductCart.BFF.Infrastructure.Models.Lab3;
 
-public class CheckoutResponse
+public class Lab3CheckoutResponse
 {
     public string CartId { get; set; } = string.Empty;
     public bool Success { get; set; }
