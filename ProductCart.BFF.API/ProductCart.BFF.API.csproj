@@ -11,10 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\ProductCart.BFF.Application\ProductCart.BFF.Application.csproj" />
     <ProjectReference Include="..\ProductCart.BFF.Infrastructure\ProductCart.BFF.Infrastructure.csproj" />
   </ItemGroup>

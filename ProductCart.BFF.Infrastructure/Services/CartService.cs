@@ -26,9 +26,12 @@ public class CartService : ICartService
 
     public async Task<bool> AddItemToCartAsync(string userId, AddToCartRequest request)
     {
+        // Konwersja productId: jeśli to int, stwórz GUID
+        var productIdGuid = ConvertToGuid(request.ProductId);
+
         var lab3Request = new Lab3AddItemRequest
         {
-            ProductId = request.ProductId,
+            ProductId = productIdGuid,
             Quantity = request.Quantity
         };
 
@@ -37,7 +40,8 @@ public class CartService : ICartService
 
     public async Task<bool> RemoveItemFromCartAsync(string userId, string productId)
     {
-        return await _cartApiClient.RemoveItemFromCartAsync(userId, productId);
+        var productIdGuid = ConvertToGuid(productId);
+        return await _cartApiClient.RemoveItemFromCartAsync(userId, productIdGuid);
     }
 
     public async Task<CheckoutResponse?> CheckoutCartAsync(string userId)
@@ -72,5 +76,17 @@ public class CartService : ICartService
                 TotalPrice = item.TotalPrice
             }).ToList()
         };
+    }
+
+    private static string ConvertToGuid(string productId)
+    {
+        if (Guid.TryParse(productId, out _))
+            return productId;
+
+        if (int.TryParse(productId, out int numericId))
+        {
+            return $"00000000-0000-0000-0000-{numericId:D12}";
+        }
+        return productId;
     }
 }

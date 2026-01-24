@@ -2,7 +2,6 @@
 using ProductCart.BFF.Application.Services.Interfaces;
 using ProductCart.BFF.Infrastructure.HttpClients;
 
-
 namespace ProductCart.BFF.Infrastructure.Services;
 
 public class CartAggregationService : ICartAggregationService
@@ -29,9 +28,12 @@ public class CartAggregationService : ICartAggregationService
 
         foreach (var item in cart.Items)
         {
-            if (int.TryParse(item.ProductId, out int productId))
+            // Konwersja GUID → int (wyciągnij ostatnie 12 cyfr)
+            var productId = ExtractProductIdFromGuid(item.ProductId);
+
+            if (productId.HasValue)
             {
-                var productDetails = await _productApiClient.GetProductByIdAsync(productId);
+                var productDetails = await _productApiClient.GetProductByIdAsync(productId.Value);
 
                 if (productDetails != null)
                 {
@@ -43,19 +45,19 @@ public class CartAggregationService : ICartAggregationService
                         UnitPrice = productDetails.Price,
                         TotalPrice = productDetails.Price * item.Quantity
                     });
-                }
-                else
-                {
-                    enrichedItems.Add(new CartItemDto
-                    {
-                        ProductId = item.ProductId,
-                        ProductName = item.ProductName,
-                        Quantity = item.Quantity,
-                        UnitPrice = item.UnitPrice,
-                        TotalPrice = item.TotalPrice
-                    });
+                    continue;
                 }
             }
+
+            // Fallback: użyj danych z koszyka
+            enrichedItems.Add(new CartItemDto
+            {
+                ProductId = item.ProductId,
+                ProductName = item.ProductName,
+                Quantity = item.Quantity,
+                UnitPrice = item.UnitPrice,
+                TotalPrice = item.TotalPrice
+            });
         }
 
         return new CartDto
@@ -66,5 +68,19 @@ public class CartAggregationService : ICartAggregationService
             LastActivityTime = cart.LastActivityTime,
             Items = enrichedItems
         };
+    }
+
+    private static int? ExtractProductIdFromGuid(string guidString)
+    {
+        if (Guid.TryParse(guidString, out var guid))
+        {
+            var guidStr = guid.ToString();
+            var lastPart = guidStr.Split('-').Last();
+
+            if (int.TryParse(lastPart, out int productId))
+                return productId;
+        }
+
+        return null;
     }
 }
