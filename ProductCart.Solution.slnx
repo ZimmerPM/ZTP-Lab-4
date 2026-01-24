@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="ProductCart.BFF.API/ProductCart.BFF.API.csproj" />
+  <Project Path="ProductCart.BFF.Application/ProductCart.BFF.Application.csproj" />
+  <Project Path="ProductCart.BFF.Infrastructure/ProductCart.BFF.Infrastructure.csproj" />
+</Solution>
