@@ -32,6 +32,8 @@ public static class MauiProgram
         });
         builder.Services.AddHttpClient<ICartService, CartService>();
 
+        builder.Services.AddSingleton<DatabaseService>();
+
         builder.Services.AddSingleton<IProductService, ProductService>();
         builder.Services.AddSingleton<ICartService, CartService>();
 

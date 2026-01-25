@@ -1,6 +1,6 @@
 ﻿using ProductCart.MAUI.Models;
 using ProductCart.MAUI.Services.Interfaces;
-using System.Dynamic;
+using ProductCart.MAUI.Helpers;
 using System.Net.Http.Json;
 
 namespace ProductCart.MAUI.Services;
@@ -8,10 +8,12 @@ namespace ProductCart.MAUI.Services;
 public class ProductService : IProductService
 {
     private readonly HttpClient _httpClient;
+    private readonly DatabaseService _databaseService;
 
-    public ProductService(HttpClient httpClient)
+    public ProductService(HttpClient httpClient, DatabaseService databaseService)
     {
         _httpClient = httpClient;
+        _databaseService = databaseService;
     }
 
     public async Task<List<Product>> GetProductsAsync()
@@ -19,13 +21,46 @@ public class ProductService : IProductService
         try
         {
             Console.WriteLine("=== GetProductsAsync START ===");
-            var url = "http://localhost:5300/api/Products";
-            Console.WriteLine($"Calling URL: {url}");
 
-            var products = await _httpClient.GetFromJsonAsync<List<Product>>(url);
+            var isOnline = ConnectivityHelper.IsOnline();
 
-            Console.WriteLine($"Received {products?.Count ?? 0} products");
-            return products ?? new List<Product>();
+            if (isOnline)
+            {
+                try
+                {
+                    var url = "http://localhost:5300/api/Products";
+                    Console.WriteLine($"[ONLINE] Calling API: {url}");
+
+                    var products = await _httpClient.GetFromJsonAsync<List<Product>>(url);
+
+                    if (products != null && products.Count > 0)
+                    {
+                        Console.WriteLine($"[ONLINE] Received {products.Count} products from API");
+
+                        var cachedProducts = products.Select(ProductCached.FromProduct).ToList();
+                        await _databaseService.SaveProductsAsync(cachedProducts);
+
+                        return products;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[ONLINE] API call failed: {ex.Message}");
+                    Console.WriteLine("[FALLBACK] Trying cache...");
+                }
+            }
+
+            Console.WriteLine("[OFFLINE/FALLBACK] Loading from cache...");
+            var cached = await _databaseService.GetAllProductsAsync();
+
+            if (cached.Count > 0)
+            {
+                Console.WriteLine($"[CACHE] Loaded {cached.Count} products from cache");
+                return cached.Select(c => c.ToProduct()).ToList();
+            }
+
+            Console.WriteLine("[ERROR] No products in cache and API unavailable");
+            return new List<Product>();
         }
         catch (Exception ex)
         {
@@ -38,9 +73,41 @@ public class ProductService : IProductService
     {
         try
         {
-            var url = $"http://localhost:5300/api/Products/{id}";
-            Console.WriteLine($"Calling URL: {url}");
-            return await _httpClient.GetFromJsonAsync<Product>(url);
+            var isOnline = ConnectivityHelper.IsOnline();
+
+            if (isOnline)
+            {
+                try
+                {
+                    var url = $"http://localhost:5300/api/Products/{id}";
+                    Console.WriteLine($"[ONLINE] Calling API: {url}");
+
+                    var product = await _httpClient.GetFromJsonAsync<Product>(url);
+
+                    if (product != null)
+                    {
+                        Console.WriteLine($"[ONLINE] Product {id} fetched from API");
+                        return product;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[ONLINE] API call failed: {ex.Message}");
+                    Console.WriteLine("[FALLBACK] Trying cache...");
+                }
+            }
+
+            Console.WriteLine($"[OFFLINE/FALLBACK] Loading product {id} from cache...");
+            var cached = await _databaseService.GetProductByIdAsync(id);
+
+            if (cached != null)
+            {
+                Console.WriteLine($"[CACHE] Product {id} loaded from cache");
+                return cached.ToProduct();
+            }
+
+            Console.WriteLine($"[ERROR] Product {id} not found in cache");
+            return null;
         }
         catch (Exception ex)
         {
