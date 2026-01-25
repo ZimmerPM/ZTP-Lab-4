@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using ProductCart.MAUI.Models;
 using ProductCart.MAUI.Services.Interfaces;
+using ProductCart.MAUI.Views;
 
 namespace ProductCart.MAUI.ViewModels;
 
@@ -9,6 +10,7 @@ namespace ProductCart.MAUI.ViewModels;
 public partial class ProductDetailsViewModel : BaseViewModel
 {
     private readonly IProductService _productService;
+    private readonly ICartService _cartService;
 
     [ObservableProperty]
     private Product? _product;
@@ -16,25 +18,29 @@ public partial class ProductDetailsViewModel : BaseViewModel
     [ObservableProperty]
     private int _productId;
 
-    public ProductDetailsViewModel(IProductService productService)
+    [ObservableProperty]
+    private int _quantityToAdd = 1;
+
+    public ProductDetailsViewModel(IProductService productService, ICartService cartService)
     {
         _productService = productService;
+        _cartService = cartService;
         Title = "Product Details";
     }
 
     [RelayCommand]
     private async Task LoadProductAsync()
     {
-        if (IsBusy || _productId == 0)
+        if (IsBusy || ProductId == 0)
             return;
 
         try
         {
-            Console.WriteLine($"=== LoadProductAsync START for ID: {_productId} ===");
+            Console.WriteLine($"=== LoadProductAsync START for ID: {ProductId} ===");
             IsBusy = true;
             HasError = false;
 
-            var product = await _productService.GetProductByIdAsync(_productId);
+            var product = await _productService.GetProductByIdAsync(ProductId);
 
             if (product != null)
             {
@@ -58,6 +64,90 @@ public partial class ProductDetailsViewModel : BaseViewModel
         finally
         {
             IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private void IncreaseQuantity()
+    {
+        if (Product != null && QuantityToAdd < Product.Quantity)
+        {
+            QuantityToAdd++;
+        }
+    }
+
+    [RelayCommand]
+    private void DecreaseQuantity()
+    {
+        if (QuantityToAdd > 1)
+        {
+            QuantityToAdd--;
+        }
+    }
+
+    [RelayCommand]
+    private async Task AddToCartAsync()
+    {
+        if (Product == null || QuantityToAdd <= 0)
+            return;
+
+        if (QuantityToAdd > Product.Quantity)
+        {
+            await App.Current.MainPage.DisplayAlert("Error",
+                $"Only {Product.Quantity} items in stock!", "OK");
+            return;
+        }
+
+        try
+        {
+            Console.WriteLine($"Adding {QuantityToAdd}x {Product.Name} to cart");
+
+            IsBusy = true;
+
+            var productGuid = new Guid($"{Product.Id:X8}-0000-0000-0000-000000000000");
+            Console.WriteLine($"Converted Product.Id {Product.Id} to Guid {productGuid}");
+
+            var cartViewModel = App.Current.Handler.MauiContext.Services.GetService<CartViewModel>();
+            if (cartViewModel != null)
+            {
+                await cartViewModel.AddProductToCartAsync(productGuid, QuantityToAdd);
+
+                await App.Current.MainPage.DisplayAlert("Success",
+                    $"Added {QuantityToAdd}x {Product.Name} to cart!", "OK");
+
+                QuantityToAdd = 1;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"ERROR adding to cart: {ex.Message}");
+            await App.Current.MainPage.DisplayAlert("Error",
+                $"Failed to add to cart: {ex.Message}", "OK");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task ViewCartAsync()
+    {
+        try
+        {
+            var navigation = Application.Current?.MainPage?.Navigation;
+            if (navigation != null)
+            {
+                var cartPage = App.Current.Handler.MauiContext.Services.GetService<CartPage>();
+                if (cartPage != null)
+                {
+                    await navigation.PushAsync(cartPage);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"ERROR navigating to cart: {ex.Message}");
         }
     }
 

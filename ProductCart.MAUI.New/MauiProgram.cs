@@ -30,16 +30,21 @@ public static class MauiProgram
             client.BaseAddress = new Uri("http://localhost:5300/api/");
             client.Timeout = TimeSpan.FromSeconds(30);
         });
+        builder.Services.AddHttpClient<ICartService, CartService>();
 
         builder.Services.AddSingleton<IProductService, ProductService>();
+        builder.Services.AddSingleton<ICartService, CartService>();
+
 
         // ViewModels
         builder.Services.AddTransient<ProductListViewModel>();
         builder.Services.AddTransient<ProductDetailsViewModel>();
+        builder.Services.AddTransient<CartViewModel>();
 
         // Views
         builder.Services.AddTransient<ProductListPage>();
         builder.Services.AddTransient<ProductDetailsPage>();
+        builder.Services.AddTransient<CartPage>();
 
         return builder.Build();
     }

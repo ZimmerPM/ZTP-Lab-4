@@ -82,6 +82,57 @@
                            TextColor="Green"/>
                 </Grid>
 
+				<StackLayout Spacing="10" Margin="0,20,0,0">
+
+					<!-- Quantity Selector -->
+					<Label Text="Quantity to Add:"
+                           FontSize="16"
+                           FontAttributes="Bold"/>
+
+					<HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+						<Button Text="-"
+                                Command="{Binding DecreaseQuantityCommand}"
+                                WidthRequest="50"
+                                HeightRequest="50"
+                                FontSize="20"
+                                BackgroundColor="{StaticResource Secondary}"/>
+
+						<Label Text="{Binding QuantityToAdd}"
+                               FontSize="24"
+                               FontAttributes="Bold"
+                               VerticalOptions="Center"
+                               WidthRequest="60"
+                               HorizontalTextAlignment="Center"/>
+
+						<Button Text="+"
+                                Command="{Binding IncreaseQuantityCommand}"
+                                WidthRequest="50"
+                                HeightRequest="50"
+                                FontSize="20"
+                                BackgroundColor="{StaticResource Secondary}"/>
+					</HorizontalStackLayout>
+
+					<!-- Add to Cart Button -->
+					<Button Text="🛒 Add to Cart"
+                            Command="{Binding AddToCartCommand}"
+                            BackgroundColor="{StaticResource Primary}"
+                            TextColor="White"
+                            FontSize="18"
+                            FontAttributes="Bold"
+                            HeightRequest="60"
+                            CornerRadius="15"
+                            Margin="0,10,0,0"/>
+
+					<!-- View Cart Button -->
+					<Button Text="View Cart"
+                            Command="{Binding ViewCartCommand}"
+                            BackgroundColor="{StaticResource Secondary}"
+                            TextColor="White"
+                            FontSize="16"
+                            HeightRequest="50"
+                            CornerRadius="10"/>
+				</StackLayout>
+
             </VerticalStackLayout>
 
         </VerticalStackLayout>

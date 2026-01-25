@@ -1,0 +1,145 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:ProductCart.MAUI.ViewModels"
+             xmlns:models="clr-namespace:ProductCart.MAUI.Models"
+             x:Class="ProductCart.MAUI.Views.CartPage"
+             x:DataType="viewmodels:CartViewModel"
+             Title="{Binding Title}">
+
+    <Grid RowDefinitions="Auto,*,Auto" Padding="0">
+        
+        <!-- Status Indicators Row -->
+        <StackLayout Grid.Row="0" Padding="20,10">
+            <!-- Loading -->
+            <ActivityIndicator IsRunning="{Binding IsBusy}"
+                             IsVisible="{Binding IsBusy}"
+                             Color="{StaticResource Primary}"
+                             HeightRequest="40"/>
+            
+            <!-- Error -->
+            <Label Text="{Binding ErrorMessage}"
+                   IsVisible="{Binding HasError}"
+                   TextColor="Red"
+                   FontSize="14"
+                   HorizontalOptions="Center"/>
+            
+            <!-- Item Count -->
+            <Label Text="{Binding ItemCount, StringFormat='{0} items in cart'}"
+                   IsVisible="{Binding ItemCount, Converter={StaticResource IsNotNullConverter}}"
+                   FontSize="16"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   Margin="0,10,0,0"/>
+        </StackLayout>
+
+        <!-- Cart Items List -->
+        <CollectionView Grid.Row="1" 
+                       ItemsSource="{Binding Items}"
+                       Margin="10,0">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:CartItem">
+                    <Frame Margin="5" 
+                           Padding="15"
+                           BorderColor="{StaticResource Primary}"
+                           CornerRadius="10">
+                        <Grid RowDefinitions="Auto,Auto,Auto" 
+                              ColumnDefinitions="*,Auto">
+                            
+                            <!-- Product Name -->
+                            <Label Grid.Row="0" Grid.Column="0"
+                                   Text="{Binding ProductName}"
+                                   FontSize="18"
+                                   FontAttributes="Bold"/>
+                            
+                            <!-- Remove Button -->
+                            <Button Grid.Row="0" Grid.Column="1"
+                                    Text="✕"
+                                    BackgroundColor="Red"
+                                    TextColor="White"
+                                    WidthRequest="40"
+                                    HeightRequest="40"
+                                    CornerRadius="20"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:CartViewModel}}, Path=RemoveItemCommand}"
+                                    CommandParameter="{Binding .}"/>
+                            
+                            <!-- Quantity and Price -->
+                            <HorizontalStackLayout Grid.Row="1" Grid.ColumnSpan="2" 
+                                                  Spacing="10"
+                                                  Margin="0,5,0,0">
+                                <Label Text="{Binding Quantity, StringFormat='Qty: {0}'}"
+                                       FontSize="14"/>
+                                <Label Text="×"
+                                       FontSize="14"/>
+                                <Label Text="{Binding DisplayPrice}"
+                                       FontSize="14"/>
+                            </HorizontalStackLayout>
+                            
+                            <!-- Item Total -->
+                            <Label Grid.Row="2" Grid.ColumnSpan="2"
+                                   Text="{Binding DisplayTotal}"
+                                   FontSize="16"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource Primary}"
+                                   HorizontalOptions="End"
+                                   Margin="0,5,0,0"/>
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+            
+            <!-- Empty View -->
+            <CollectionView.EmptyView>
+                <StackLayout Padding="20" VerticalOptions="Center">
+                    <Label Text="🛒"
+                           FontSize="60"
+                           HorizontalOptions="Center"/>
+                    <Label Text="Your cart is empty"
+                           FontSize="20"
+                           HorizontalOptions="Center"
+                           Margin="0,10,0,0"/>
+                    <Label Text="Add some products!"
+                           FontSize="14"
+                           TextColor="Gray"
+                           HorizontalOptions="Center"
+                           Margin="0,5,0,0"/>
+                </StackLayout>
+            </CollectionView.EmptyView>
+        </CollectionView>
+
+        <!-- Bottom Section: Total and Checkout -->
+        <StackLayout Grid.Row="2" 
+                     Padding="20"
+                     BackgroundColor="{StaticResource Primary}"
+                     Spacing="15">
+            
+            <!-- Total -->
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Grid.Column="0"
+                       Text="TOTAL:"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       VerticalOptions="Center"/>
+                <Label Grid.Column="1"
+                       Text="{Binding DisplayTotal}"
+                       FontSize="24"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       VerticalOptions="Center"/>
+            </Grid>
+            
+            <!-- Checkout Button -->
+            <Button Text="Checkout"
+                    Command="{Binding CheckoutCommand}"
+                    BackgroundColor="White"
+                    TextColor="{StaticResource Primary}"
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    HeightRequest="50"
+                    CornerRadius="25"/>
+        </StackLayout>
+
+    </Grid>
+
+</ContentPage>

@@ -1,5 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 using ProductCart.MAUI.Models;
 using ProductCart.MAUI.Services.Interfaces;
 using ProductCart.MAUI.Views;
@@ -71,7 +70,6 @@ public partial class ProductListViewModel : BaseViewModel
 
         try
         {
-            // Get the navigation
             var navigation = Application.Current?.MainPage?.Navigation;
             if (navigation == null)
             {
@@ -79,7 +77,6 @@ public partial class ProductListViewModel : BaseViewModel
                 return;
             }
 
-            // Get ProductDetailsPage from DI
             var detailsPage = App.Current.Handler.MauiContext.Services.GetService<ProductDetailsPage>();
             if (detailsPage?.BindingContext is ProductDetailsViewModel vm)
             {
