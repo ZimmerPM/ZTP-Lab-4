@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:ProductCart.MAUI.ViewModels"
+             x:Class="ProductCart.MAUI.Views.ProductDetailsPage"
+             x:DataType="viewmodels:ProductDetailsViewModel"
+             Title="{Binding Title}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+
+            <!-- Loading Indicator -->
+            <ActivityIndicator IsRunning="{Binding IsBusy}"
+                             IsVisible="{Binding IsBusy}"
+                             Color="{StaticResource Primary}"
+                             HeightRequest="50"/>
+
+            <!-- Error Message -->
+            <Label Text="{Binding ErrorMessage}"
+                   IsVisible="{Binding HasError}"
+                   TextColor="Red"
+                   FontSize="16"
+                   HorizontalOptions="Center"/>
+
+            <!-- Product Details -->
+            <VerticalStackLayout IsVisible="{Binding Product, Converter={StaticResource IsNotNullConverter}}"
+                               Spacing="15">
+
+                <!-- Product Name -->
+                <Frame BackgroundColor="{StaticResource Primary}"
+                       Padding="15"
+                       CornerRadius="10">
+                    <Label Text="{Binding Product.Name}"
+                           TextColor="White"
+                           FontSize="24"
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center"/>
+                </Frame>
+
+                <!-- Details Grid -->
+                <Grid RowDefinitions="Auto,Auto,Auto,Auto"
+                      ColumnDefinitions="120,*"
+                      RowSpacing="15">
+
+                    <!-- ID -->
+                    <Label Grid.Row="0" Grid.Column="0"
+                           Text="ID:"
+                           FontSize="16"
+                           FontAttributes="Bold"/>
+                    <Label Grid.Row="0" Grid.Column="1"
+                           Text="{Binding Product.Id}"
+                           FontSize="16"/>
+
+                    <!-- Category -->
+                    <Label Grid.Row="1" Grid.Column="0"
+                           Text="Category:"
+                           FontSize="16"
+                           FontAttributes="Bold"/>
+                    <Label Grid.Row="1" Grid.Column="1"
+                           Text="{Binding Product.CategoryName}"
+                           FontSize="16"/>
+
+                    <!-- Price -->
+                    <Label Grid.Row="2" Grid.Column="0"
+                           Text="Price:"
+                           FontSize="16"
+                           FontAttributes="Bold"/>
+                    <Label Grid.Row="2" Grid.Column="1"
+                           Text="{Binding Product.DisplayPrice}"
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource Primary}"/>
+
+                    <!-- Quantity (from Lab 1 details endpoint) -->
+                    <Label Grid.Row="3" Grid.Column="0"
+                           Text="In Stock:"
+                           FontSize="16"
+                           FontAttributes="Bold"/>
+                    <Label Grid.Row="3" Grid.Column="1"
+                           Text="{Binding Product.Quantity}"
+                           FontSize="16"
+                           TextColor="Green"/>
+                </Grid>
+
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
+    

@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using ProductCart.MAUI.Models;
 using ProductCart.MAUI.Services.Interfaces;
+using ProductCart.MAUI.Views;
 using System.Collections.ObjectModel;
 
 namespace ProductCart.MAUI.ViewModels;
@@ -66,7 +67,33 @@ public partial class ProductListViewModel : BaseViewModel
         if (product == null)
             return;
 
-        // TODO: Nawigacja do szczegółów
-        await Shell.Current.DisplayAlertAsync("Product", $"Selected: {product.Name}", "OK");
+        Console.WriteLine($"Product tapped: {product.Name} (ID: {product.Id})");
+
+        try
+        {
+            // Get the navigation
+            var navigation = Application.Current?.MainPage?.Navigation;
+            if (navigation == null)
+            {
+                Console.WriteLine("ERROR: Navigation is null!");
+                return;
+            }
+
+            // Get ProductDetailsPage from DI
+            var detailsPage = App.Current.Handler.MauiContext.Services.GetService<ProductDetailsPage>();
+            if (detailsPage?.BindingContext is ProductDetailsViewModel vm)
+            {
+                vm.ProductId = product.Id;
+                await navigation.PushAsync(detailsPage);
+            }
+            else
+            {
+                Console.WriteLine("ERROR: Could not get ProductDetailsPage or ViewModel!");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"ERROR navigating to details: {ex.Message}");
+        }
     }
 }
