@@ -2,6 +2,7 @@
 using ProductCart.MAUI.Services.Interfaces;
 using ProductCart.MAUI.Helpers;
 using System.Net.Http.Json;
+using System.Diagnostics;
 
 namespace ProductCart.MAUI.Services;
 
@@ -20,22 +21,23 @@ public class ProductService : IProductService
     {
         try
         {
-            Console.WriteLine("=== GetProductsAsync START ===");
+            Debug.WriteLine("=== GetProductsAsync START ===");
 
             var isOnline = ConnectivityHelper.IsOnline();
 
             if (isOnline)
             {
+                // ONLINE
                 try
                 {
                     var url = "http://localhost:5300/api/Products";
-                    Console.WriteLine($"[ONLINE] Calling API: {url}");
+                    Debug.WriteLine($"[ONLINE] Calling API: {url}");
 
                     var products = await _httpClient.GetFromJsonAsync<List<Product>>(url);
 
                     if (products != null && products.Count > 0)
                     {
-                        Console.WriteLine($"[ONLINE] Received {products.Count} products from API");
+                        Debug.WriteLine($"[ONLINE] Received {products.Count} products from API");
 
                         var cachedProducts = products.Select(ProductCached.FromProduct).ToList();
                         await _databaseService.SaveProductsAsync(cachedProducts);
@@ -45,26 +47,27 @@ public class ProductService : IProductService
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[ONLINE] API call failed: {ex.Message}");
-                    Console.WriteLine("[FALLBACK] Trying cache...");
+                    Debug.WriteLine($"[ONLINE] API call failed: {ex.Message}");
+                    Debug.WriteLine("[FALLBACK] Trying cache...");
                 }
             }
 
-            Console.WriteLine("[OFFLINE/FALLBACK] Loading from cache...");
+            // OFFLINE
+            Debug.WriteLine("[OFFLINE/FALLBACK] Loading from cache...");
             var cached = await _databaseService.GetAllProductsAsync();
 
             if (cached.Count > 0)
             {
-                Console.WriteLine($"[CACHE] Loaded {cached.Count} products from cache");
+                Debug.WriteLine($"[CACHE] Loaded {cached.Count} products from cache");
                 return cached.Select(c => c.ToProduct()).ToList();
             }
 
-            Console.WriteLine("[ERROR] No products in cache and API unavailable");
+            Debug.WriteLine("[ERROR] No products in cache and API unavailable");
             return new List<Product>();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ERROR in GetProductsAsync: {ex.Message}");
+            Debug.WriteLine($"ERROR in GetProductsAsync: {ex.Message}");
             return new List<Product>();
         }
     }
@@ -77,41 +80,43 @@ public class ProductService : IProductService
 
             if (isOnline)
             {
+                // ONLINE
                 try
                 {
                     var url = $"http://localhost:5300/api/Products/{id}";
-                    Console.WriteLine($"[ONLINE] Calling API: {url}");
+                    Debug.WriteLine($"[ONLINE] Calling API: {url}");
 
                     var product = await _httpClient.GetFromJsonAsync<Product>(url);
 
                     if (product != null)
                     {
-                        Console.WriteLine($"[ONLINE] Product {id} fetched from API");
+                        Debug.WriteLine($"[ONLINE] Product {id} fetched from API");
                         return product;
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[ONLINE] API call failed: {ex.Message}");
-                    Console.WriteLine("[FALLBACK] Trying cache...");
+                    Debug.WriteLine($"[ONLINE] API call failed: {ex.Message}");
+                    Debug.WriteLine("[FALLBACK] Trying cache...");
                 }
             }
 
-            Console.WriteLine($"[OFFLINE/FALLBACK] Loading product {id} from cache...");
+            // OFFLINE
+            Debug.WriteLine($"[OFFLINE/FALLBACK] Loading product {id} from cache...");
             var cached = await _databaseService.GetProductByIdAsync(id);
 
             if (cached != null)
             {
-                Console.WriteLine($"[CACHE] Product {id} loaded from cache");
+                Debug.WriteLine($"[CACHE] Product {id} loaded from cache");
                 return cached.ToProduct();
             }
 
-            Console.WriteLine($"[ERROR] Product {id} not found in cache");
+            Debug.WriteLine($"[ERROR] Product {id} not found in cache");
             return null;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ERROR in GetProductByIdAsync: {ex.Message}");
+            Debug.WriteLine($"ERROR in GetProductByIdAsync: {ex.Message}");
             return null;
         }
     }

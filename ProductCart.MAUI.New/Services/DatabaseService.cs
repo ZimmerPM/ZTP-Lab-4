@@ -1,5 +1,6 @@
 ﻿using ProductCart.MAUI.Models;
 using SQLite;
+using System.Diagnostics;
 
 namespace ProductCart.MAUI.Services;
 
@@ -11,7 +12,7 @@ public class DatabaseService
     public DatabaseService()
     {
         _dbPath = Path.Combine(FileSystem.AppDataDirectory, "productcart.db3");
-        Console.WriteLine($"Database path: {_dbPath}");
+        Debug.WriteLine($"Database path: {_dbPath}");
     }
 
     private async Task InitAsync()
@@ -21,7 +22,7 @@ public class DatabaseService
 
         _database = new SQLiteAsyncConnection(_dbPath);
         await _database.CreateTableAsync<ProductCached>();
-        Console.WriteLine("Database initialized");
+        Debug.WriteLine("Database initialized");
     }
 
     public async Task<List<ProductCached>> GetAllProductsAsync()
@@ -46,7 +47,7 @@ public class DatabaseService
 
         await _database.InsertAllAsync(products);
 
-        Console.WriteLine($"Saved {products.Count} products to cache");
+        Debug.WriteLine($"Saved {products.Count} products to cache");
     }
 
     public async Task<bool> IsCacheValidAsync()
@@ -68,6 +69,6 @@ public class DatabaseService
     {
         await InitAsync();
         await _database!.DeleteAllAsync<ProductCached>();
-        Console.WriteLine("Cache cleared");
+        Debug.WriteLine("Cache cleared");
     }
 }
