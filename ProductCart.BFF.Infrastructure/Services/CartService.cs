@@ -40,7 +40,10 @@ public class CartService : ICartService
     public async Task<bool> RemoveItemFromCartAsync(string userId, string productId)
     {
         var productIdGuid = ConvertToGuid(productId);
-        return await _cartApiClient.RemoveItemFromCartAsync(userId, productIdGuid);
+        return await _cartApiClient.RemoveItemFromCartAsync(
+            userId,      
+            productIdGuid,  
+            userId);
     }
 
     public async Task<CheckoutResponse?> CheckoutCartAsync(string userId)

@@ -31,10 +31,9 @@ public class CartApiClient
         return response.IsSuccessStatusCode;
     }
 
-    public async Task<bool> RemoveItemFromCartAsync(string cartId, string productId)
+    public async Task<bool> RemoveItemFromCartAsync(string cartId, string productId, string userId) 
     {
-        var response = await _httpClient.DeleteAsync($"/carts/{cartId}/items/{productId}");
-
+        var response = await _httpClient.DeleteAsync($"/carts/{cartId}/items/{productId}?userId={userId}");
         return response.IsSuccessStatusCode;
     }
 

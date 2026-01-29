@@ -103,7 +103,8 @@ public class CartController : ControllerBase
     {
         var success = await _cartApiClient.RemoveItemFromCartAsync(
             cartId.ToString(),
-            productId.ToString());
+            productId.ToString(),
+            userId.ToString());
 
         if (!success)
             return BadRequest(new { message = "Failed to remove item from cart" });
