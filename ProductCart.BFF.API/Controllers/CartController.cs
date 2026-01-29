@@ -114,9 +114,14 @@ public class CartController : ControllerBase
 
     [HttpPost("carts/{cartId}/checkout")]
     public async Task<IActionResult> Checkout(
-        Guid cartId,
-        [FromQuery] Guid userId)
+    Guid cartId,
+    [FromQuery] Guid userId)
     {
+        var cart = await _cartApiClient.GetCartAsync(cartId.ToString());
+
+        if (cart == null)
+            return NotFound(new { message = $"Cart {cartId} not found" });
+
         var result = await _cartApiClient.CheckoutCartAsync(
             cartId.ToString(),
             userId.ToString());
@@ -124,7 +129,47 @@ public class CartController : ControllerBase
         if (result == null || !result.Success)
             return BadRequest(new { message = result?.Message ?? "Checkout failed" });
 
-        return Ok(result);
+        var orderItems = new List<object>();
+
+        foreach (var item in cart.Items)
+        {
+            var productId = ExtractProductIdFromGuid(item.ProductId);
+
+            if (productId.HasValue)
+            {
+                var product = await _productApiClient.GetProductByIdAsync(productId.Value);
+
+                if (product != null)
+                {
+                    orderItems.Add(new
+                    {
+                        productId = item.ProductId,
+                        productName = product.Name,
+                        quantity = item.Quantity,
+                        unitPrice = product.Price,
+                        totalPrice = product.Price * item.Quantity
+                    });
+                }
+            }
+        }
+
+        var enrichedResponse = new
+        {
+            success = result.Success,
+            message = result.Message,
+            oldCartId = cartId,
+            newCartId = result.CartId,
+
+            orderSummary = new
+            {
+                items = orderItems,
+                totalAmount = orderItems.Sum(i => (decimal)((dynamic)i).totalPrice),
+                itemCount = orderItems.Sum(i => (int)((dynamic)i).quantity),
+                numberOfProducts = orderItems.Count
+            }
+        };
+
+        return Ok(enrichedResponse);
     }
 
     private static int? ExtractProductIdFromGuid(string guidString)
