@@ -1,54 +1,62 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Hosting;
-using ProductCart.BFF.Application.DTOs;
-using ProductCart.BFF.Application.Services.Interfaces;
-using System;
+using ProductCart.BFF.Infrastructure.HttpClients;
+using ProductCart.BFF.Infrastructure.Models.Lab3;
 
 namespace ProductCart.BFF.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("")]
 public class CartController : ControllerBase
 {
-    private readonly ICartService _cartService;
-    private readonly ICartAggregationService _cartAggregationService;
+    private readonly CartApiClient _cartApiClient;
 
-    public CartController(
-        ICartService cartService,
-        ICartAggregationService cartAggregationService)
+    public CartController(CartApiClient cartApiClient)
     {
-        _cartService = cartService;
-        _cartAggregationService = cartAggregationService;
+        _cartApiClient = cartApiClient;
     }
 
-    [HttpGet("{userId}")]
-    public async Task<IActionResult> GetCart(string userId)
+    [HttpGet("carts/{cartId}")]
+    public async Task<IActionResult> GetCart(Guid cartId)
     {
-        var cart = await _cartAggregationService.GetEnrichedCartAsync(userId);
+        var cart = await _cartApiClient.GetCartAsync(cartId.ToString());
 
         if (cart == null)
-            return NotFound(new { message = $"Cart for user {userId} not found" });
+            return NotFound(new { message = $"Cart {cartId} not found" });
 
         return Ok(cart);
     }
 
-    [HttpPost("{userId}/items")]
+    [HttpPost("carts/{cartId}/items")]
     public async Task<IActionResult> AddItemToCart(
-        string userId,
-        [FromBody] AddToCartRequest request)
+        Guid cartId,
+        [FromQuery] Guid userId,
+        [FromBody] Lab3AddItemRequest request)
     {
-        var success = await _cartService.AddItemToCartAsync(userId, request);
+        var success = await _cartApiClient.AddItemToCartAsync(
+            cartId.ToString(),
+            userId.ToString(),
+            request);
 
         if (!success)
             return BadRequest(new { message = "Failed to add item to cart" });
 
-        return Ok(new { message = "Item added to cart successfully" });
+        return Ok(new
+        {
+            cartId = cartId,
+            success = true,
+            message = "Product added to cart"
+        });
     }
 
-    [HttpDelete("{userId}/items/{productId}")]
-    public async Task<IActionResult> RemoveItemFromCart(string userId, string productId)
+    [HttpDelete("carts/{cartId}/items/{productId}")]
+    public async Task<IActionResult> RemoveItemFromCart(
+        Guid cartId,
+        Guid productId,
+        [FromQuery] Guid userId)
     {
-        var success = await _cartService.RemoveItemFromCartAsync(userId, productId);
+        var success = await _cartApiClient.RemoveItemFromCartAsync(
+            cartId.ToString(),
+            productId.ToString());
 
         if (!success)
             return BadRequest(new { message = "Failed to remove item from cart" });
@@ -56,10 +64,14 @@ public class CartController : ControllerBase
         return Ok(new { message = "Item removed from cart successfully" });
     }
 
-    [HttpPost("{userId}/checkout")]
-    public async Task<IActionResult> Checkout(string userId)
+    [HttpPost("carts/{cartId}/checkout")]
+    public async Task<IActionResult> Checkout(
+        Guid cartId,
+        [FromQuery] Guid userId)
     {
-        var result = await _cartService.CheckoutCartAsync(userId);
+        var result = await _cartApiClient.CheckoutCartAsync(
+            cartId.ToString(),
+            userId.ToString());
 
         if (result == null || !result.Success)
             return BadRequest(new { message = result?.Message ?? "Checkout failed" });

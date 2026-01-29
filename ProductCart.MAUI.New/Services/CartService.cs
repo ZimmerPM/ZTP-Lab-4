@@ -8,7 +8,7 @@ namespace ProductCart.MAUI.Services;
 public class CartService : ICartService
 {
     private readonly HttpClient _httpClient;
-    private const string BaseUrl = "http://localhost:5200";
+    private const string BaseUrl = "http://localhost:5300";
 
     private readonly Guid _userId = Guid.Parse("11111111-1111-1111-1111-111111111111");
     private Guid _currentCartId;

@@ -28,7 +28,6 @@ public class CartAggregationService : ICartAggregationService
 
         foreach (var item in cart.Items)
         {
-            // Konwersja GUID → int (wyciągnij ostatnie 12 cyfr)
             var productId = ExtractProductIdFromGuid(item.ProductId);
 
             if (productId.HasValue)
@@ -49,7 +48,6 @@ public class CartAggregationService : ICartAggregationService
                 }
             }
 
-            // Fallback: użyj danych z koszyka
             enrichedItems.Add(new CartItemDto
             {
                 ProductId = item.ProductId,
@@ -85,4 +83,3 @@ public class CartAggregationService : ICartAggregationService
         return null;
     }
 }
-
