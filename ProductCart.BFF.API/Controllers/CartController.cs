@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ProductCart.BFF.Infrastructure.HttpClients;
 using ProductCart.BFF.Infrastructure.Models.Lab3;
+using ProductCart.BFF.Application.DTOs;
 
 namespace ProductCart.BFF.API.Controllers;
 
@@ -9,10 +10,14 @@ namespace ProductCart.BFF.API.Controllers;
 public class CartController : ControllerBase
 {
     private readonly CartApiClient _cartApiClient;
+    private readonly ProductApiClient _productApiClient;
 
-    public CartController(CartApiClient cartApiClient)
+    public CartController(
+        CartApiClient cartApiClient,
+        ProductApiClient productApiClient)
     {
         _cartApiClient = cartApiClient;
+        _productApiClient = productApiClient;
     }
 
     [HttpGet("carts/{cartId}")]
@@ -23,7 +28,49 @@ public class CartController : ControllerBase
         if (cart == null)
             return NotFound(new { message = $"Cart {cartId} not found" });
 
-        return Ok(cart);
+        var enrichedItems = new List<CartItemDto>();
+
+        foreach (var item in cart.Items)
+        {
+            var productId = ExtractProductIdFromGuid(item.ProductId);
+
+            if (productId.HasValue)
+            {
+                var productDetails = await _productApiClient.GetProductByIdAsync(productId.Value);
+
+                if (productDetails != null)
+                {
+                    enrichedItems.Add(new CartItemDto
+                    {
+                        ProductId = item.ProductId,
+                        ProductName = productDetails.Name,
+                        Quantity = item.Quantity,
+                        UnitPrice = productDetails.Price,
+                        TotalPrice = productDetails.Price * item.Quantity
+                    });
+                    continue;
+                }
+            }
+
+            enrichedItems.Add(new CartItemDto
+            {
+                ProductId = item.ProductId,
+                ProductName = item.ProductName,
+                Quantity = item.Quantity,
+                UnitPrice = item.UnitPrice,
+                TotalPrice = item.TotalPrice
+            });
+        }
+
+        var response = new
+        {
+            cartId = cart.Id,
+            userId = cart.UserId,
+            items = enrichedItems,
+            totalAmount = enrichedItems.Sum(i => i.TotalPrice)
+        };
+
+        return Ok(response);
     }
 
     [HttpPost("carts/{cartId}/items")]
@@ -77,5 +124,16 @@ public class CartController : ControllerBase
             return BadRequest(new { message = result?.Message ?? "Checkout failed" });
 
         return Ok(result);
+    }
+
+    private static int? ExtractProductIdFromGuid(string guidString)
+    {
+        if (Guid.TryParse(guidString, out var guid))
+        {
+            var bytes = guid.ToByteArray();
+            var productId = BitConverter.ToInt32(bytes, 0);
+            return productId;
+        }
+        return null;
     }
 }
