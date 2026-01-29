@@ -1,4 +1,5 @@
 ﻿using ProductCart.MAUI.ViewModels;
+using System.Diagnostics;
 
 namespace ProductCart.MAUI.Views;
 
@@ -8,7 +9,7 @@ public partial class CartPage : ContentPage
 
     public CartPage(CartViewModel viewModel)
     {
-        Console.WriteLine("=== CartPage CONSTRUCTOR ===");
+        Debug.WriteLine("=== CartPage CONSTRUCTOR ===");
         InitializeComponent();
         _viewModel = viewModel;
         BindingContext = _viewModel;
@@ -17,7 +18,7 @@ public partial class CartPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        Console.WriteLine("=== CartPage OnAppearing ===");
+        Debug.WriteLine("=== CartPage OnAppearing ===");
         await _viewModel.LoadCartCommand.ExecuteAsync(null);
     }
 }

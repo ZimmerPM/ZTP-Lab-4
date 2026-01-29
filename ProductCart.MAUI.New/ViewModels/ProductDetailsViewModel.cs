@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using ProductCart.MAUI.Models;
 using ProductCart.MAUI.Services.Interfaces;
 using ProductCart.MAUI.Views;
+using System.Diagnostics;
 
 namespace ProductCart.MAUI.ViewModels;
 
@@ -36,7 +37,7 @@ public partial class ProductDetailsViewModel : BaseViewModel
 
         try
         {
-            Console.WriteLine($"=== LoadProductAsync START for ID: {ProductId} ===");
+            Debug.WriteLine($"=== LoadProductAsync START for ID: {ProductId} ===");
             IsBusy = true;
             HasError = false;
 
@@ -45,19 +46,19 @@ public partial class ProductDetailsViewModel : BaseViewModel
             if (product != null)
             {
                 Product = product;
-                Console.WriteLine($"Loaded product: {product.Name}");
+                Debug.WriteLine($"Loaded product: {product.Name}");
                 Title = product.Name;
             }
             else
             {
-                Console.WriteLine("Product not found!");
+                Debug.WriteLine("Product not found!");
                 HasError = true;
                 ErrorMessage = "Product not found";
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ERROR loading product: {ex.Message}");
+            Debug.WriteLine($"ERROR loading product: {ex.Message}");
             HasError = true;
             ErrorMessage = $"Failed to load product: {ex.Message}";
         }
@@ -100,12 +101,12 @@ public partial class ProductDetailsViewModel : BaseViewModel
 
         try
         {
-            Console.WriteLine($"Adding {QuantityToAdd}x {Product.Name} to cart");
+            Debug.WriteLine($"Adding {QuantityToAdd}x {Product.Name} to cart");
 
             IsBusy = true;
 
             var productGuid = new Guid($"{Product.Id:X8}-0000-0000-0000-000000000000");
-            Console.WriteLine($"Converted Product.Id {Product.Id} to Guid {productGuid}");
+            Debug.WriteLine($"Converted Product.Id {Product.Id} to Guid {productGuid}");
 
             var cartViewModel = App.Current.Handler.MauiContext.Services.GetService<CartViewModel>();
             if (cartViewModel != null)
@@ -120,7 +121,7 @@ public partial class ProductDetailsViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ERROR adding to cart: {ex.Message}");
+            Debug.WriteLine($"ERROR adding to cart: {ex.Message}");
             await App.Current.MainPage.DisplayAlert("Error",
                 $"Failed to add to cart: {ex.Message}", "OK");
         }
@@ -147,13 +148,13 @@ public partial class ProductDetailsViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ERROR navigating to cart: {ex.Message}");
+            Debug.WriteLine($"ERROR navigating to cart: {ex.Message}");
         }
     }
 
     partial void OnProductIdChanged(int value)
     {
-        Console.WriteLine($"ProductId changed to: {value}");
+        Debug.WriteLine($"ProductId changed to: {value}");
         if (value > 0)
         {
             _ = LoadProductAsync();

@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using ProductCart.MAUI.Models;
 using ProductCart.MAUI.Services.Interfaces;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 
 namespace ProductCart.MAUI.ViewModels;
 
@@ -40,7 +41,7 @@ public partial class CartViewModel : BaseViewModel
 
         try
         {
-            Console.WriteLine("=== LoadCartAsync START ===");
+            Debug.WriteLine("=== LoadCartAsync START ===");
             IsBusy = true;
             HasError = false;
 
@@ -63,16 +64,16 @@ public partial class CartViewModel : BaseViewModel
                 }
 
                 UpdateTotals();
-                Console.WriteLine($"Cart loaded: {Items.Count} items, Total: {DisplayTotal}");
+                Debug.WriteLine($"Cart loaded: {Items.Count} items, Total: {DisplayTotal}");
             }
             else
             {
-                Console.WriteLine("Cart not found!");
+                Debug.WriteLine("Cart not found!");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ERROR in LoadCartAsync: {ex.Message}");
+            Debug.WriteLine($"ERROR in LoadCartAsync: {ex.Message}");
             HasError = true;
             ErrorMessage = $"Failed to load cart: {ex.Message}";
         }
@@ -90,7 +91,7 @@ public partial class CartViewModel : BaseViewModel
 
         try
         {
-            Console.WriteLine($"Removing item: {item.ProductName}");
+            Debug.WriteLine($"Removing item: {item.ProductName}");
 
             var productGuid = new Guid($"{item.ProductId:X8}-0000-0000-0000-000000000000");
             var success = await _cartService.RemoveProductFromCartAsync(DefaultUserId, productGuid);
@@ -99,7 +100,7 @@ public partial class CartViewModel : BaseViewModel
             {
                 Items.Remove(item);
                 UpdateTotals();
-                Console.WriteLine("Item removed successfully");
+                Debug.WriteLine("Item removed successfully");
             }
             else
             {
@@ -108,7 +109,7 @@ public partial class CartViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ERROR removing item: {ex.Message}");
+            Debug.WriteLine($"ERROR removing item: {ex.Message}");
             await App.Current.MainPage.DisplayAlert("Error", $"Failed to remove item: {ex.Message}", "OK");
         }
     }
@@ -124,7 +125,7 @@ public partial class CartViewModel : BaseViewModel
 
         try
         {
-            Console.WriteLine("Starting checkout...");
+            Debug.WriteLine("Starting checkout...");
             IsBusy = true;
 
             var result = await _cartService.CheckoutCartAsync(DefaultUserId);
@@ -145,7 +146,7 @@ public partial class CartViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ERROR during checkout: {ex.Message}");
+            Debug.WriteLine($"ERROR during checkout: {ex.Message}");
             await App.Current.MainPage.DisplayAlert("Error", $"Checkout failed: {ex.Message}", "OK");
         }
         finally
@@ -158,19 +159,19 @@ public partial class CartViewModel : BaseViewModel
     {
         try
         {
-            Console.WriteLine($"Adding product {productId} to cart (qty: {quantity})");
+            Debug.WriteLine($"Adding product {productId} to cart (qty: {quantity})");
 
             var success = await _cartService.AddProductToCartAsync(DefaultUserId, productId, quantity);
 
             if (success)
             {
-                Console.WriteLine("Product added to cart successfully");
+                Debug.WriteLine("Product added to cart successfully");
                 await LoadCartAsync(); // Refresh cart
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ERROR adding product to cart: {ex.Message}");
+            Debug.WriteLine($"ERROR adding product to cart: {ex.Message}");
         }
     }
 
@@ -179,5 +180,28 @@ public partial class CartViewModel : BaseViewModel
         TotalValue = Items.Sum(i => i.TotalPrice);
         ItemCount = Items.Sum(i => i.Quantity);
         DisplayTotal = $"${TotalValue:F2}";
+    }
+
+    [RelayCommand]
+    private async Task ClearCartDataAsync()
+    {
+        try
+        {
+            _cartService.ClearCurrentCart();
+
+            Items.Clear();
+            UpdateTotals();
+
+            await App.Current.MainPage.DisplayAlert("Success",
+                "Cart cleared! New cart created.", "OK");
+
+            Debug.WriteLine("Cart data cleared and new cart created");
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"ERROR clearing cart data: {ex.Message}");
+            await App.Current.MainPage.DisplayAlert("Error",
+                $"Failed to clear cart: {ex.Message}", "OK");
+        }
     }
 }

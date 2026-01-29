@@ -1,4 +1,5 @@
 ﻿using ProductCart.MAUI.ViewModels;
+using System.Diagnostics;
 
 namespace ProductCart.MAUI.Views;
 
@@ -8,30 +9,30 @@ public partial class ProductListPage : ContentPage
 
     public ProductListPage(ProductListViewModel viewModel)
     {
-        Console.WriteLine("=== ProductListPage CONSTRUCTOR ===");
+        Debug.WriteLine("=== ProductListPage CONSTRUCTOR ===");
         InitializeComponent();
         _viewModel = viewModel;
         BindingContext = _viewModel;
 
-        Console.WriteLine($"BindingContext set. Products count: {_viewModel.Products.Count}");
+        Debug.WriteLine($"BindingContext set. Products count: {_viewModel.Products.Count}");
     }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
 
-        Console.WriteLine($"=== OnAppearing === Products count: {_viewModel.Products.Count}");
+        Debug.WriteLine($"=== OnAppearing === Products count: {_viewModel.Products.Count}");
 
         try
         {
-            Console.WriteLine("Calling LoadProductsCommand...");
+            Debug.WriteLine("Calling LoadProductsCommand...");
             await _viewModel.LoadProductsCommand.ExecuteAsync(null);
-            Console.WriteLine($"After LoadProducts. Count: {_viewModel.Products.Count}");
+            Debug.WriteLine($"After LoadProducts. Count: {_viewModel.Products.Count}");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ERROR in OnAppearing: {ex.Message}");
-            Console.WriteLine($"Stack: {ex.StackTrace}");
+            Debug.WriteLine($"ERROR in OnAppearing: {ex.Message}");
+            Debug.WriteLine($"Stack: {ex.StackTrace}");
         }
     }
 }

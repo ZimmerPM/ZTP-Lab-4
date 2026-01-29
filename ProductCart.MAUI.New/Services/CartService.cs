@@ -1,5 +1,6 @@
 ﻿using ProductCart.MAUI.Models;
 using ProductCart.MAUI.Services.Interfaces;
+using System.Diagnostics;
 using System.Net.Http.Json;
 
 namespace ProductCart.MAUI.Services;
@@ -22,14 +23,14 @@ public class CartService : ICartService
             _currentCartId = Guid.NewGuid();
             Preferences.Set("CurrentCartId", _currentCartId.ToString());
         }
-        Console.WriteLine($"CartService initialized with CartId: {_currentCartId}");
+        Debug.WriteLine($"CartService initialized with CartId: {_currentCartId}");
     }
 
     public async Task<Cart?> GetCartAsync(string userId)
     {
         try
         {
-            Console.WriteLine($"=== GetCartAsync for cartId: {_currentCartId} ===");
+            Debug.WriteLine($"=== GetCartAsync for cartId: {_currentCartId} ===");
 
             var response = await _httpClient.GetAsync($"{BaseUrl}/carts/{_currentCartId}");
 
@@ -65,7 +66,7 @@ public class CartService : ICartService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ERROR getting cart: {ex.Message}");
+            Debug.WriteLine($"ERROR getting cart: {ex.Message}");
             return null;
         }
     }
@@ -74,8 +75,8 @@ public class CartService : ICartService
     {
         try
         {
-            Console.WriteLine($"=== AddProductToCartAsync ===");
-            Console.WriteLine($"CartId: {_currentCartId}, UserId: {_userId}, ProductId: {productId}, Quantity: {quantity}");
+            Debug.WriteLine($"=== AddProductToCartAsync ===");
+            Debug.WriteLine($"CartId: {_currentCartId}, UserId: {_userId}, ProductId: {productId}, Quantity: {quantity}");
 
             var request = new { ProductId = productId, Quantity = quantity };
 
@@ -84,13 +85,13 @@ public class CartService : ICartService
                 request);
 
             var responseContent = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"Response: {response.StatusCode} - {responseContent}");
+            Debug.WriteLine($"Response: {response.StatusCode} - {responseContent}");
 
             return response.IsSuccessStatusCode;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ERROR adding product to cart: {ex.Message}");
+            Debug.WriteLine($"ERROR adding product to cart: {ex.Message}");
             return false;
         }
     }
@@ -99,8 +100,8 @@ public class CartService : ICartService
     {
         try
         {
-            Console.WriteLine($"=== RemoveProductFromCartAsync ===");
-            Console.WriteLine($"CartId: {_currentCartId}, UserId: {_userId}, ProductId: {productId}");
+            Debug.WriteLine($"=== RemoveProductFromCartAsync ===");
+            Debug.WriteLine($"CartId: {_currentCartId}, UserId: {_userId}, ProductId: {productId}");
 
             var response = await _httpClient.DeleteAsync(
                 $"{BaseUrl}/carts/{_currentCartId}/items/{productId}?userId={_userId}");
@@ -109,7 +110,7 @@ public class CartService : ICartService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ERROR removing product from cart: {ex.Message}");
+            Debug.WriteLine($"ERROR removing product from cart: {ex.Message}");
             return false;
         }
     }
@@ -118,7 +119,7 @@ public class CartService : ICartService
     {
         try
         {
-            Console.WriteLine($"=== CheckoutCartAsync ===");
+            Debug.WriteLine($"=== CheckoutCartAsync ===");
 
             var response = await _httpClient.PostAsync(
                 $"{BaseUrl}/carts/{_currentCartId}/checkout?userId={_userId}",
@@ -128,7 +129,7 @@ public class CartService : ICartService
 
             _currentCartId = Guid.NewGuid();
             Preferences.Set("CurrentCartId", _currentCartId.ToString());
-            Console.WriteLine($"Checkout successful - new CartId: {_currentCartId}");
+            Debug.WriteLine($"Checkout successful - new CartId: {_currentCartId}");
 
             return new Cart
             {
@@ -139,9 +140,18 @@ public class CartService : ICartService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ERROR checking out cart: {ex.Message}");
+            Debug.WriteLine($"ERROR checking out cart: {ex.Message}");
             return null;
         }
+    }
+
+    public void ClearCurrentCart()
+    {
+        _currentCartId = Guid.NewGuid();
+
+        Preferences.Set("CurrentCartId", _currentCartId.ToString());
+
+        Debug.WriteLine($"[CART] New cart created: {_currentCartId}");
     }
 }
 

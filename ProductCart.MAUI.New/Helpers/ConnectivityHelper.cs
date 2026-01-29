@@ -1,4 +1,7 @@
-﻿namespace ProductCart.MAUI.Helpers;
+﻿using System.Diagnostics;
+
+namespace ProductCart.MAUI.Helpers;
+
 
 public static class ConnectivityHelper
 {
@@ -7,7 +10,7 @@ public static class ConnectivityHelper
         var current = Connectivity.Current.NetworkAccess;
         var isOnline = current == NetworkAccess.Internet;
 
-        Console.WriteLine($"Network status: {(isOnline ? "ONLINE" : "OFFLINE")}");
+        Debug.WriteLine($"Network status: {(isOnline ? "ONLINE" : "OFFLINE")}");
         return isOnline;
     }
 

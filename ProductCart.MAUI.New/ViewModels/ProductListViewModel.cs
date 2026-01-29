@@ -3,6 +3,7 @@ using ProductCart.MAUI.Models;
 using ProductCart.MAUI.Services.Interfaces;
 using ProductCart.MAUI.Views;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 
 namespace ProductCart.MAUI.ViewModels;
 
@@ -26,37 +27,37 @@ public partial class ProductListViewModel : BaseViewModel
 
         try
         {
-            Console.WriteLine("=== LoadProductsAsync START ===");
+            Debug.WriteLine("=== LoadProductsAsync START ===");
             IsBusy = true;
             HasError = false;
             ErrorMessage = string.Empty;
 
             Products.Clear();
 
-            Console.WriteLine("Calling GetProductsAsync...");
+            Debug.WriteLine("Calling GetProductsAsync...");
             var products = await _productService.GetProductsAsync();
 
-            Console.WriteLine($"Received {products.Count} products");
+            Debug.WriteLine($"Received {products.Count} products");
 
             foreach (var product in products)
             {
-                Console.WriteLine($"Adding product: {product.Name}");
+                Debug.WriteLine($"Adding product: {product.Name}");
                 Products.Add(product);
             }
 
-            Console.WriteLine($"Products collection now has {Products.Count} items");
+            Debug.WriteLine($"Products collection now has {Products.Count} items");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ERROR in LoadProductsAsync: {ex.Message}");
-            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            Debug.WriteLine($"ERROR in LoadProductsAsync: {ex.Message}");
+            Debug.WriteLine($"Stack trace: {ex.StackTrace}");
             HasError = true;
             ErrorMessage = $"Unable to load products: {ex.Message}";
         }
         finally
         {
             IsBusy = false;
-            Console.WriteLine("=== LoadProductsAsync END ===");
+            Debug.WriteLine("=== LoadProductsAsync END ===");
         }
     }
 
@@ -66,14 +67,14 @@ public partial class ProductListViewModel : BaseViewModel
         if (product == null)
             return;
 
-        Console.WriteLine($"Product tapped: {product.Name} (ID: {product.Id})");
+        Debug.WriteLine($"Product tapped: {product.Name} (ID: {product.Id})");
 
         try
         {
             var navigation = Application.Current?.MainPage?.Navigation;
             if (navigation == null)
             {
-                Console.WriteLine("ERROR: Navigation is null!");
+                Debug.WriteLine("ERROR: Navigation is null!");
                 return;
             }
 
@@ -85,12 +86,12 @@ public partial class ProductListViewModel : BaseViewModel
             }
             else
             {
-                Console.WriteLine("ERROR: Could not get ProductDetailsPage or ViewModel!");
+                Debug.WriteLine("ERROR: Could not get ProductDetailsPage or ViewModel!");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ERROR navigating to details: {ex.Message}");
+            Debug.WriteLine($"ERROR navigating to details: {ex.Message}");
         }
     }
 }
