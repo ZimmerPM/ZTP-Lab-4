@@ -51,15 +51,8 @@ public partial class CartViewModel : BaseViewModel
             {
                 Items.Clear();
 
-                // Enrich cart items with product data
                 foreach (var item in loadedCart.Items)
                 {
-                    var product = await _productService.GetProductByIdAsync(item.ProductId);
-                    if (product != null)
-                    {
-                        item.ProductName = product.Name;
-                        item.Price = product.Price;
-                    }
                     Items.Add(item);
                 }
 
